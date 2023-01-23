@@ -1,11 +1,13 @@
 const express = require('express');
 const app = express();
 const userRoutes = require('./routes/userRoutes')
-const User = require('./models/User');
-const Message = require('./models/Message')
+const User = require('./mongoose/model/User')
+const Message = require('./mongoose/model/Message')
 const rooms = ['general', 'tech', 'finance', 'crypto'];
 const cors = require('cors');
 const connectToMongoose = require('./mongoose/db');
+const route = require('./controllers/userControl');
+
 
 //Connect to DB
 connectToMongoose();
@@ -15,7 +17,7 @@ app.use(express.json());
 app.use(cors());
 
 app.use('/users', userRoutes)
-require('./connection')
+
 
 const server = require('http').createServer(app);
 const PORT = 5001;
@@ -73,30 +75,18 @@ io.on('connection', (socket)=> {
     socket.broadcast.emit('notifications', room)
   })
 
-  app.delete('/logout', async(req, res)=> {
-    try {
-      const {_id, newMessages} = req.body;
-      const user = await User.findById(_id);
-      user.status = "offline";
-      user.newMessages = newMessages;
-      await user.save();
-      const members = await User.find();
-      socket.broadcast.emit('new-user', members);
-      res.status(200).send();
-    } catch (e) {
-      console.log(e);
-      res.status(400).send()
-    }
-  })
+  app.delete('/logout', route.logout);
 
-})
+});
 
 
 app.get('/rooms', (req, res)=> {
   res.json(rooms)
-})
+});
+
+//Implement add room function. create.
 
 
 server.listen(PORT, ()=> {
   console.log('listening to port', PORT)
-})
+});
