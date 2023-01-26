@@ -8,17 +8,25 @@ router.get('/dashboard/:id', async (req, res) => {
 
     try {
         const profile = await Profile.findOne({ user: req.params.id });
-        const user = await User.findById(req.params.id);
+        
         if (!profile) {
             return res.status(400).json({ msg: 'There is no profile for this user' });
         }
-        console.log(profile)
-        return res.status(200).json({ prof: profile, use: user });
+        return res.status(200).json({ profile: profile });
     } catch (err) {
         console.error(err.message);
         res.status(500).send('Server Error');
     }
 });
+
+router.get('/dashboard/:id/1', async (req, res) => {
+    try {
+        const users = await User.find({}, 'name');
+        res.json(users);
+      } catch (err) {
+        res.status(500).json({ error: err.message });
+      }
+    });
 
 router.put('/dashboard/:id/edit-profile', async (req, res) => {
     try {
@@ -40,9 +48,18 @@ router.put('/dashboard/:id/edit-profile', async (req, res) => {
 });
 
 
+router.delete('/dashboard/:id', async (req, res) => {
+    try {
+        const deleteAccount = await User.findByIdAndDelete(req.params.id);
+        res.status(200).json({ success: true });
+    } catch (err) {
+        res.status(400).json({ success: false, error: error.message });
+    }
+});
+
 router.post('/create-profile', async (req, res) => {
     const { name, bio, location, status, gender, age, avatar, email } = req.body;
-    console.log('Here?')
+
     let user = await User.findOne({ email });
 
     if (user) {

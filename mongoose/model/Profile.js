@@ -28,8 +28,7 @@ const ProfileSchema = new Schema({
         type: Number,
     },
     avatar: {
-        data: Buffer,
-        contentType: String,
+        type: String
     },
     following: [
         {
